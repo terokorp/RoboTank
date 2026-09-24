@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #222;
+  color: white;
+  margin: 0;
+  padding: 30px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+}
+
+.servo {
+  background: #333;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 12px;
+}
+
+input[type=range] {
+  width: 100%;
+}
+
+.value {
+  font-size: 32px;
+  margin: 10px;
+}
