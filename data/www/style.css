@@ -1,10 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #222;
-  color: white;
   margin: 0;
   padding: 30px;
+  background: #222;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  user-select: none;
+  touch-action: none;
 }
 
 .container {
@@ -12,18 +18,134 @@ body {
   margin: auto;
 }
 
-.servo {
-  background: #333;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 12px;
+h1 {
+  margin-bottom: 30px;
 }
 
-input[type=range] {
+.joystick-container {
+  width: min(80vw, 350px);
+  height: min(80vw, 350px);
+  margin: auto;
+  position: relative;
+}
+
+.joystick {
+  position: absolute;
   width: 100%;
+  height: 100%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle,
+      #444 0%,
+      #333 65%,
+      #222 100%);
+
+  border: 3px solid #666;
+
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.7),
+    0 5px 20px rgba(0, 0, 0, 0.5);
+
+  overflow: hidden;
+}
+
+/* Crosshair */
+
+.joystick::before {
+  content: "";
+  position: absolute;
+
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+
+  width: 1px;
+
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.joystick::after {
+  content: "";
+  position: absolute;
+
+  top: 50%;
+  left: 10%;
+  right: 10%;
+
+  height: 1px;
+
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Center marker */
+
+.center-marker {
+  position: absolute;
+
+  width: 8px;
+  height: 8px;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: #888;
+}
+
+/* Joystick handle */
+
+.handle {
+  position: absolute;
+
+  width: 60px;
+  height: 60px;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: #777;
+
+  border: 3px solid #aaa;
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.5);
+
+  pointer-events: none;
+}
+
+.values {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+
+  margin-top: 30px;
 }
 
 .value {
+  min-width: 100px;
+}
+
+.label {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.number {
   font-size: 32px;
-  margin: 10px;
+  font-family: monospace;
+}
+
+.unit {
+  font-size: 14px;
+  color: #aaa;
 }

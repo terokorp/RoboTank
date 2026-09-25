@@ -33,6 +33,8 @@ ESP8266WebServer server(80);
 int servo0 = 90;
 int servo1 = 90;
 
+float maxSpeed = 20.0f; // Maximum speed percentage (0-100)
+
 // Convert angle to PCA9685 value
 uint16_t angleToPWM(int angle)
 {
@@ -71,36 +73,66 @@ void handleRoot()
 
 void handleServo()
 {
-  if (!server.hasArg("channel") || !server.hasArg("angle"))
-  {
-    server.send(400, "text/plain", "Missing parameters");
-    return;
-  }
+    if (!server.hasArg("speed") || !server.hasArg("direction"))
+    {
+        server.send(400, "text/plain", "Missing parameters");
+        return;
+    }
 
-  int channel = server.arg("channel").toInt();
-  int angle = server.arg("angle").toInt();
+    float speed = server.arg("speed").toFloat();
+    float direction = server.arg("direction").toFloat();
 
-  // Only allow channels 0 and 1
-  if (channel < 0 || channel > 1)
-  {
-    server.send(400, "text/plain", "Invalid channel");
-    return;
-  }
+    // Limit input values
+    speed = constrain(speed, 0.0f, 100.0f);
+    direction = constrain(direction, -180.0f, 180.0f);
 
-  angle = constrain(angle, 0, 180);
 
-  if (channel == 0)
-  {
-    servo0 = angle;
-  }
-  else
-  {
-    servo1 = angle;
-  }
+    // Convert direction to radians
+    float radians = direction * PI / 180.0f;
 
-  setServo(channel, angle);
+    // Convert joystick direction into X/Y movement
+    //
+    // 0°   = forward
+    // +90° = right
+    // -90° = left
+    // 180° = backward
+    //
+    float forward = cos(radians) * speed * (maxSpeed / 100.0f);
+    float turn    = sin(radians) * speed * (maxSpeed / 100.0f);
 
-  server.send(200, "text/plain", "OK");
+
+    // Differential/tank drive mixing
+    float leftMotor  = forward + turn;
+    float rightMotor = forward - turn;
+
+
+    // Normalize if either motor exceeds 100
+    float maxMotor = max(abs(leftMotor), abs(rightMotor));
+
+    if (maxMotor > 100.0f)
+    {
+        leftMotor  = leftMotor  / maxMotor * 100.0f;
+        rightMotor = rightMotor / maxMotor * 100.0f;
+    }
+
+    // Convert motor speed to continuous servo position
+    //
+    // 90 = stopped
+    // >90 = one direction
+    // <90 = opposite direction
+    //
+    int leftServo  = map((int)leftMotor,  -100, 100, 180, 0);
+    int rightServo = map((int)rightMotor, -100, 100, 180, 0);
+
+    // Save values
+    servo0 = leftServo;
+    servo1 = rightServo;
+
+    // Output to PCA9685
+    setServo(0, leftServo);
+    setServo(1, rightServo);
+
+    server.send(200, "text/plain", "OK");
 }
 
 void listFiles()
